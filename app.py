@@ -2,129 +2,150 @@ import streamlit as st
 import pickle
 import re
 import nltk
+
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import wordpunct_tokenize
 from nltk.stem import WordNetLemmatizer
 
 # ----------------------------------
-# 1. NLTK Data & Resource Loading
+# UI Styling (YouTube Light Mode)
 # ----------------------------------
-@st.cache_resource
-def load_resources():
-    # Fix for LookupError: Download data directly on the server
-    nltk.download('punkt', quiet=True)
-    nltk.download('punkt_tab', quiet=True) 
-    nltk.download('stopwords', quiet=True)
-    nltk.download('wordnet', quiet=True)
-    nltk.download('omw-1.4', quiet=True)
-    
-    # Load model and vectorizer
-    with open("log_model.pkl", "rb") as f:
-        m = pickle.load(f)
-    with open("vectorizer.pkl", "rb") as f:
-        v = pickle.load(f)
-    return m, v
-
-model, vectorizer = load_resources()
-
-# ----------------------------------
-# 2. UI Styling (YouTube White Mode)
-# ----------------------------------
-st.set_page_config(page_title="Sentiment AI", page_icon="📺")
-
-st.markdown("""
+def apply_light_theme():
+    st.markdown("""
     <style>
-    .stApp { background-color: #f8f9fa; }
+    .stApp {
+        background-color: #f9f9f9;
+        color: #0f0f0f;
+    }
     div.block-container {
         background-color: #ffffff;
-        padding: 3rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        border: 1px solid #edf2f7;
-        margin-top: 20px;
+        padding: 2.5rem 3.5rem;
+        border-radius: 16px;
+        border: 1px solid #e5e5e5;
+        margin-top: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .yt-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    .stTextArea textarea {
+        background-color: #fcfcfc !important;
+        color: #0f0f0f !important;
+        border: 1px solid #cccccc !important;
+        border-radius: 8px !important;
+        font-size: 16px;
     }
     div.stButton > button {
         background-color: #FF0000;
         color: white;
-        border-radius: 12px;
+        padding: 14px 24px;
+        border-radius: 30px;
         font-weight: 700;
         width: 100%;
-        height: 3em;
     }
-    .result-card {
+    .result-box {
         padding: 20px;
         border-radius: 12px;
         text-align: center;
+        margin-top: 25px;
         background: #f1f1f1;
-        border-top: 5px solid #FF0000;
-        margin-top: 20px;
+        border: 1px solid #e5e5e5;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# ----------------------------------
-# 3. Header & Branding
-# ----------------------------------
-st.markdown("""
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" width="45">
-        <h1 style='margin:0; font-size: 32px;'>Sentiment <span style='color:#FF0000;'>AI</span></h1>
-    </div>
-    <p style="color: #606060;">High-precision NLP for YouTube Audience Analysis</p>
-    <hr>
-""", unsafe_allow_html=True)
+apply_light_theme()
 
 # ----------------------------------
-# 4. Preprocessing Logic
+# NLP + Model Loader
+# ----------------------------------
+@st.cache_resource
+def load_resources():
+    nltk.download("stopwords")
+    nltk.download("wordnet")
+    nltk.download("punkt")
+    nltk.download("punkt_tab")   # IMPORTANT FOR STREAMLIT CLOUD
+
+    with open("log_model.pkl", "rb") as f:
+        model = pickle.load(f)
+
+    with open("vectorizer.pkl", "rb") as f:
+        vectorizer = pickle.load(f)
+
+    return model, vectorizer
+
+model, vectorizer = load_resources()
+
+stop_words = set(stopwords.words("english"))
+lemmatizer = WordNetLemmatizer()
+
+# ----------------------------------
+# Text Preprocessing (SAFE)
 # ----------------------------------
 def preprocess_text(text):
     text = str(text).lower()
-    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"http\S+|www\S+", "", text)
     text = re.sub(r"[^a-z\s]", "", text)
-    tokens = word_tokenize(text)
-    stop_words = set(stopwords.words("english"))
-    lemmatizer = WordNetLemmatizer()
-    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+
+    tokens = wordpunct_tokenize(text)   # SAFE TOKENIZER
+
+    tokens = [
+        lemmatizer.lemmatize(word)
+        for word in tokens
+        if word not in stop_words and len(word) > 2
+    ]
+
     return " ".join(tokens)
 
 # ----------------------------------
-# 5. Main UI Logic
+# UI
 # ----------------------------------
-comment = st.text_area("COMMENT INPUT", placeholder="Paste a YouTube comment here...", height=150)
+st.markdown("""
+<div class="yt-header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" width="45">
+    <h2 style="margin:0;font-weight:800;">
+        Sentiment <span style="color:#FF0000;">AI</span>
+    </h2>
+</div>
+""", unsafe_allow_html=True)
 
-if st.button("Analyze Sentiment"):
+st.write("Analyze YouTube comment sentiment using NLP.")
+
+comment = st.text_area("", placeholder="Enter comment for analysis...", height=130)
+
+if st.button("RUN ANALYSIS"):
     if not comment.strip():
-        st.warning("⚠️ Please enter a comment.")
+        st.warning("⚠️ Please enter a comment")
     else:
-        processed = preprocess_text(comment)
-        vectorized = vectorizer.transform([processed])
-        
-        proba = model.predict_proba(vectorized)[0]
-        prediction = model.predict(vectorized)[0]
-        confidence = max(proba) * 100
+        with st.spinner("Analyzing..."):
+            processed = preprocess_text(comment)
+            vectorized = vectorizer.transform([processed])
 
-        # Display Result
-        color = "#10b981" if prediction == 1 else "#ef4444"
-        label = "POSITIVE 😊" if prediction == 1 else "NEGATIVE 😠"
-        
+            proba = model.predict_proba(vectorized)[0]
+            prediction = model.predict(vectorized)[0]
+            confidence = max(proba) * 100
+
+        label = "POSITIVE" if prediction == 1 else "NEGATIVE"
+        color = "#008000" if prediction == 1 else "#CC0000"
+        icon = "📈" if prediction == 1 else "📉"
+
         st.markdown(f"""
-            <div class="result-card" style="border-top-color: {color};">
-                <h1 style="color: {color}; margin: 0;">{label}</h1>
-                <p style="color: #64748b; font-weight: bold; margin-top: 10px;">Confidence: {confidence:.2f}%</p>
-            </div>
+        <div class="result-box">
+            <h2 style="color:{color};">{icon} {label}</h2>
+            <p><b>Confidence:</b> {confidence:.2f}%</p>
+        </div>
         """, unsafe_allow_html=True)
-        
-        st.markdown(f"<style>.stProgress > div > div > div > div {{ background-color: {color}; }}</style>", unsafe_allow_html=True)
+
         st.progress(int(confidence))
 
 # ----------------------------------
-# 6. Developer Footer
+# Footer
 # ----------------------------------
-st.markdown(f"""
-    <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-        <p style="margin: 0; color: #b5b5b5; font-size: 11px; letter-spacing: 1px;">DEVELOPED BY</p>
-        <p style="margin: 5px 0 0 0; color: #0f0f0f; font-size: 16px; font-weight: 800;">
-            BAGADI <span style="color: #FF0000;">SANTHOSH KUMAR</span>
-        </p>
-    </div>
+st.markdown("""
+<div style="margin-top:40px;text-align:center;color:#999;font-size:12px;">
+    DEVELOPED BY <b>BAGADI <span style="color:#FF0000;">SANTHOSH KUMAR</span></b>
+</div>
 """, unsafe_allow_html=True)
