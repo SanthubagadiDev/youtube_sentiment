@@ -61,7 +61,6 @@ Several classification algorithms were evaluated to determine which handles the 
 ## Model Evolution & Performance
 **The Challenge: Class Imbalance**
 **Multinomial Naive Bayes** achieved high accuracy **(89%)**. However, due to class **imbalance in the target data**, the model was biased toward the majority class and failed to predict minority sentiments correctly.
-
 **The Solution: Logistic Regression**
 We shifted to Logistic Regression, which proved more robust in managing imbalanced text features. After fine-tuning the decision thresholds and hyperparameters, the model achieved superior predictive reliability.
 
@@ -69,8 +68,8 @@ We shifted to Logistic Regression, which proved more robust in managing imbalanc
 ---
 
 ## Key Insights
-**Text length:** Negative sentiments often correlate with shorter, more aggressive bursts of text, while positive feedback tends to be more descriptive.
+- **Text length:** Negative sentiments often correlate with shorter, more aggressive bursts of text, while positive feedback tends to be more descriptive.
 
-**Keywords:** Strong indicators like "amazing," "thanks," and "helpful" drove positive classifications, while specific technical complaints often flagged "neutral" or "negative" tones.
+- **Keywords:** Strong indicators like "amazing," "thanks," and "helpful" drove positive classifications, while specific technical complaints often flagged "neutral" or "negative" tones.
 
-**Model Robustness:** Logistic Regression's ability to provide probability estimates allowed us to better calibrate the model against the imbalanced nature of the dataset.
+- **Model Robustness:** Logistic Regression's ability to provide probability estimates allowed us to better calibrate the model against the imbalanced nature of the dataset.
