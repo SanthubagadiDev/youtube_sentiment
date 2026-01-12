@@ -1,25 +1,40 @@
-# 📺 YouTube Comments Sentiment Analysis
+#  YouTube Comments Sentiment Analysis
 
-## 📌 Project Overview
-This project leverages **Machine Learning (ML)** and **Natural Language Processing (NLP)** to analyze user engagement on YouTube. By processing thousands of comments, the model classifies sentiments as **Positive, Negative, or Neutral**, providing content creators with an automated way to gauge audience reactions.  
+### 🔗Live_Demo [vist the web](https://youtubesentiment-y6yx2gpdus6zzf9u5rxtdc.streamlit.app/)
 
-The system can help in understanding audience mood, identifying popular trends, and monitoring engagement efficiently.
+##  Project Overview
+
+In today's digital era, audience feedback is one of the most valuable resources for content creators and brands. This project presents an **end-to-end Machine Learning pipeline** to automate sentiment analysis of YouTube comments. By leveraging **Natural Language Processing (NLP)** techniques, the system processes thousands of unstructured text entries and classifies them into **Positive**, **Negative**, or **Neutral** sentiments with high accuracy.
+
+The system is capable of handling imbalanced datasets and short, slang-filled comments common on social media platforms. This allows creators and analysts to gain actionable insights from viewer feedback efficiently.
+
 
 ---
 
-## 📊 Dataset Information
+## 📊 Dataset Information 
 The dataset used is the **YouTube Comments Dataset**, containing thousands of real-world comments across various video categories.
 
-**Source:** [Kaggle – YouTube Comments Dataset](YOUR_DATASET_LINK_HERE)  
+**Source:** https://www.kaggle.com/datasets/atifaliak/youtube-comments-dataset/data
 
 **Key Features:**
-- **Comment**: Raw text of the user comment.  
-- **Likes**: Number of likes on the comment (useful for weighted sentiment).  
-- **Sentiment (Target)**: Categorized sentiment label (Positive, Negative, Neutral).
+- **Total Records:** Thousands of real-world comments.
+- **Key Features:** Raw text comments and associated metadata.
+- **Sentiment (Target)**: Categorized sentiment label (**Positive**, **Negative**, **Neutral**).
 
 ---
 
-## 🛠️ NLP & Preprocessing Pipeline
+##  Tools & Technologies Used
+
+- **Python:** Main programming language
+- **Pandas, NumPy:** Data handling
+- **Scikit-learn:** Machine Learning models
+- **NLTK:** NLP preprocessing
+- **Matplotlib, Seaborn:** Visualization
+- **TF-IDF Vectorizer:** Text feature extraction
+
+---
+
+## NLP & Preprocessing Pipeline
 Processing social media text requires specialized steps to clean and structure the data for modeling:
 
 1. **Data Cleaning**: Removing URLs, special characters, emojis, and HTML tags.  
@@ -33,32 +48,29 @@ Processing social media text requires specialized steps to clean and structure t
 ## 📈 Machine Learning Models
 Several classification algorithms were evaluated to determine which handles the nuances of internet slang and short comments most effectively:
 
-| Model                       | Accuracy | Precision | Recall |
-|-------------------------------|----------|-----------|--------|
-| Logistic Regression           | 82%      | 0.81      | 0.80   |
-| Multinomial Naive Bayes       | 79%      | 0.78      | 0.77   |
-| Random Forest                 | 85%      | 0.84      | 0.83   |
-| Support Vector Machine (SVM)  | 87%      | 0.86      | 0.86   |
+| Model                       | Accuracy |
+|-------------------------------|----------|
+| K-Nearest Neighbors (KNN) | 80.44 |
+| Decision Tree (Before Tuning) | 81.2 |
+| Multinomial Naive Bayes       | 89    | 
+| Logistic Regression           | 87     | 
 
-> **Final Model:** SVM was selected for deployment due to its superior performance in high-dimensional text space.
-
----
-
-## 💡 Key Features of the App
-- **Single Comment Prediction**: Paste a YouTube comment to see its sentiment polarity.  
-- **Batch Analysis**: Upload a CSV file of comments to get a summary report of overall audience sentiment.  
-- **Word Cloud Visualization**: Generates visual representation of the most frequently used words in positive vs. negative comments.
 
 ---
 
-## 🔗 Project Files
-- `YouTube_Comments_Dataset.csv` – Preprocessed dataset.  
-- `sentiment_analysis.ipynb` – Jupyter Notebook with preprocessing, modeling, and evaluation.  
-- `requirements.txt` – Python dependencies.  
+## Model Evolution & Performance
+**The Challenge: Class Imbalance**
+**Multinomial Naive Bayes** achieved high accuracy **(89%)**. However, due to class **imbalance in the target data**, the model was biased toward the majority class and failed to predict minority sentiments correctly.
+
+**The Solution: Logistic Regression**
+We shifted to Logistic Regression, which proved more robust in managing imbalanced text features. After fine-tuning the decision thresholds and hyperparameters, the model achieved superior predictive reliability.
+
 
 ---
 
-## 🛠️ How to Run
-1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+## Key Insights
+**Text length:** Negative sentiments often correlate with shorter, more aggressive bursts of text, while positive feedback tends to be more descriptive.
+
+**Keywords:** Strong indicators like "amazing," "thanks," and "helpful" drove positive classifications, while specific technical complaints often flagged "neutral" or "negative" tones.
+
+**Model Robustness:** Logistic Regression's ability to provide probability estimates allowed us to better calibrate the model against the imbalanced nature of the dataset.
